@@ -25,3 +25,8 @@ def is_valid_city(city) -> bool:
         raise ValidError("City name is invalid")
     return True
 
+
+if __name__ == '__main__':
+    conf = Config()
+    print(conf.city_url)
+    print(get_weather_from_api("Moscow", conf))

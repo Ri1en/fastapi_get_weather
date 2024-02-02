@@ -8,14 +8,43 @@
         </form>
         <ul id='messages'>
         </ul>
+        <label for="city">City name</label>
+        <form name="city" id="city" >
+            <input type="text" id="city_text"/>
+             <output name="result" for="a b"></output>
+        </form>
+        <label for="temp">Temperature</label>
+        <form name="temp" id="temp" >
+            <input type="text" id="temp_text" autocomplete="off"/>
+        </form>
+
+        <label for="humidity">Humidity</label>
+        <form name="humidity" id="humidity" >
+            <input type="text" id="humidity_text" autocomplete="off"/>
+        </form>
+
+        <label for="weather_description">Weather description</label>
+        <form name="weather_description" id="weather_description" >
+            <input type="text" id="description_text" autocomplete="off"/>
+        </form>
+
+        <label for="response_time">Response time</label>
+        <form name="response_time" id="response_time" >
+            <input type="text" id="response_time_text" autocomplete="off"/>
+        </form>
+
     <script>
             var ws = new WebSocket("ws://localhost:8000/get_weather/ws");
             ws.onmessage = function(event) {
                 var messages = document.getElementById('messages')
                 var message = document.createElement('li')
-                var content = document.createTextNode(event.data)
-                message.appendChild(content)
-                messages.appendChild(message)
+                var jsonData = event.data
+                var parsedData = JSON.parse(jsonData)
+                var city = document.getElementById('city_text').value = parsedData.city
+                var temp = document.getElementById('temp_text').value = parsedData.temp
+                var hum = document.getElementById('humidity_text').value = parsedData.humidity
+                var des = document.getElementById('description_text').value = parsedData.weather_description
+                var res_time = document.getElementById('response_time_text').value = parsedData.response_time
             };
             function sendMessage(event) {
                 var input = document.getElementById("messageText")

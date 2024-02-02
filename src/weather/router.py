@@ -1,7 +1,8 @@
 from fastapi.routing import APIRouter
-from fastapi import WebSocket, WebSocketDisconnect, Depends
+from fastapi import WebSocket, Depends
 from weather.services import get_weather_from_api
 from weather.config import Config
+from datetime import datetime
 
 from functools import lru_cache
 
@@ -24,20 +25,14 @@ async def websocket_endpoint(websocket: WebSocket, config: Config = Depends(get_
     while True:
         data = await websocket.receive_text()
         weather = get_weather_from_api(data, config)
-        weather_message = f"""
-                    Weather in {weather.city}:\n
-                    average temperature : {weather.temp}\n
-                    minimal temperature : {weather.temp_min}\n
-                    maximum temperature : {weather.temp_max}\n
-                    humidity: {weather.humidity}\n
-                    weather description: {weather.weather_description}
-                    """
-        await websocket.send_text(weather_message)
+        response_time = datetime.now()
+        formats = "%Y-%m-%d %H:%M:%S"
+        data = {
+            "city": weather.city,
+            "temp": weather.temp,
+            "humidity": weather.humidity,
+            "weather_description": weather.weather_description,
+            "response_time": response_time.strftime(formats)
+        }
+        await websocket.send_json(data)
 
-
-@router.get("/vars")
-async def env(config: Config = Depends(get_settings)):
-    return {
-        "api_key": config.api_key,
-        "url": config.city_url
-    }

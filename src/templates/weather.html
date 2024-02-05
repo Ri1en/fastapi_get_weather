@@ -41,10 +41,10 @@
                 var jsonData = event.data
                 var parsedData = JSON.parse(jsonData)
                 var city = document.getElementById('city_text').value = parsedData.city
-                var temp = document.getElementById('temp_text').value = parsedData.temp
+                var temp = document.getElementById('temp_text').value = parsedData.temp + "°C"
                 var hum = document.getElementById('humidity_text').value = parsedData.humidity
                 var des = document.getElementById('description_text').value = parsedData.weather_description
-                var res_time = document.getElementById('response_time_text').value = parsedData.response_time
+                var res_time = document.getElementById('response_time_text').value = parsedData.response_date +" "+ parsedData.response_time
             };
             function sendMessage(event) {
                 var input = document.getElementById("messageText")

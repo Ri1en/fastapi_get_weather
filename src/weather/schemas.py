@@ -22,4 +22,5 @@ class WeatherResponseModel(BaseModel):
     temp: float
     humidity: float
     weather_description: str
+    response_date: str
     response_time: str

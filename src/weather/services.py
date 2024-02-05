@@ -28,7 +28,7 @@ class WeatherServices:
         today: str = datetime.now().strftime(formats)
         query: dict = {
             "city": self.city,
-            "response_time": today
+            "response_date": today
         }
         with MongoDb(self.config, 'test') as collection:
             result = collection.find_one(query)
@@ -51,7 +51,8 @@ class WeatherServices:
     def save_weather_in_db(data: dict) -> dict:
         formats: str = "%Y-%m-%d"
         today: str = datetime.now().strftime(formats)
-        data['response_time'] = today
+        data['response_date'] = today
+        data['response_time'] = datetime.now().strftime('%H:%M:%S')
         serialized_data = WeatherResponseModel.model_construct(**data).model_dump()
         with MongoDb(settings, collection='test') as collection:
             collection.insert_one(serialized_data)

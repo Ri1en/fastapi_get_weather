@@ -15,3 +15,11 @@ class WeatherModel(BaseModel):
         self.temp = float('{:.3f}'.format(self.temp - 273))
         self.temp_max = float('{:.3f}'.format(self.temp_max - 273))
         self.temp_min = float('{:.3f}'.format(self.temp_min - 273))
+
+
+class WeatherResponseModel(BaseModel):
+    city: str
+    temp: float
+    humidity: float
+    weather_description: str
+    response_time: str

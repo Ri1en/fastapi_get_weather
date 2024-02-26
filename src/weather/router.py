@@ -1,7 +1,8 @@
 from fastapi.routing import APIRouter
-from fastapi import WebSocket, Depends
+from fastapi import WebSocket
 
 from functools import lru_cache
+from typing import Any
 
 from weather.services import WeatherServices
 from config import Config
@@ -20,10 +21,11 @@ def get_settings():
 
 
 @router.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket, config: Config = Depends(get_settings)):
+async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     while True:
-        data: str = await websocket.receive_text()
+        data = await websocket.receive_text()
+        config: Config = get_settings()
         weather = WeatherServices(config, city=data)
-        response: dict = weather.fetch_weather()
+        response: dict[str, Any] = weather.fetch_weather().model_dump()
         await websocket.send_json(response)

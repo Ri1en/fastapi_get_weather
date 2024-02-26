@@ -4,8 +4,6 @@ from dotenv import load_dotenv
 from pages.router import router as router_page
 from weather.router import router as router_weather
 
-load_dotenv('.env')
-
 
 app = FastAPI(title="get_weather")
 

@@ -2,28 +2,29 @@ import requests
 from datetime import datetime
 
 from config import settings, Config
-from weather.schemas import WeatherModel, WeatherResponseModel
+from weather.schemas import WeatherModel
 from db.database import MongoDb
-from weather.validators import is_valid_city
 
 
 class WeatherServices:
-    def __init__(self, config, city):
-        self.config: Config = config
-        self.city: str = city
+    def __init__(self, config: Config, city: str):
+        self.config = config
+        self.city = city
 
-    def get_weather_from_api(self) -> dict | None:
-        if is_valid_city(self.city):
-            url = self.config.city_url
-            res = requests.get(url.format(city=self.city, api_key=self.config.api_key))
-            data: dict = res.json()
-            model_object = WeatherModel.model_construct(**data, **data['main'])
-            model_object.weather_description = model_object.weather[0]["description"]
-            model_object.kelvin_to_celsius_validate()
-            return model_object.model_dump()
-        return None
+    def get_weather_from_api(self) -> WeatherModel | None:
+        url = self.config.city_url
+        res = requests.get(url.format(city=self.city, api_key=self.config.api_key))
+        data: dict = res.json()
+        model_object = WeatherModel.model_construct(**data, **data['main'])
+        model_object.weather_description = model_object.weather[0]["description"]
+        formats: str = "%Y-%m-%d"
+        today: str = datetime.now().strftime(formats)
+        model_object.response_date = today
+        model_object.response_time = datetime.now().strftime('%H:%M:%S')
+        model_object.kelvin_to_celsius_validate()
+        return model_object
 
-    def get_weather_from_db(self) -> dict | None:
+    def get_weather_from_db(self) -> WeatherModel | None:
         formats: str = "%Y-%m-%d"
         today: str = datetime.now().strftime(formats)
         query: dict = {
@@ -33,28 +34,22 @@ class WeatherServices:
         with MongoDb(self.config, 'test') as collection:
             result = collection.find_one(query)
         if result:
-            return WeatherResponseModel.model_construct(**result).model_dump()
+            return WeatherModel.model_construct(**result)
         return None
 
-    def fetch_weather(self) -> dict | None:
+    def fetch_weather(self) -> WeatherModel | None:
         if self.get_weather_from_db():
             return self.get_weather_from_db()
         else:
-            data: dict = self.get_weather_from_api()
+            data: WeatherModel = self.get_weather_from_api()
             if data:
-                response_data: dict = self.save_weather_in_db(data)
-                return response_data
+                self.save_weather_in_db(data)
+                return data
             else:
                 return None
 
     @staticmethod
-    def save_weather_in_db(data: dict) -> dict:
-        formats: str = "%Y-%m-%d"
-        today: str = datetime.now().strftime(formats)
-        data['response_date'] = today
-        data['response_time'] = datetime.now().strftime('%H:%M:%S')
-        serialized_data = WeatherResponseModel.model_construct(**data).model_dump()
+    def save_weather_in_db(data: WeatherModel):
+        serialized_data = data.model_dump()
         with MongoDb(settings, collection='test') as collection:
             collection.insert_one(serialized_data)
-        serialized_data.pop('_id')
-        return serialized_data

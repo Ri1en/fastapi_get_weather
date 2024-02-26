@@ -1,5 +1,6 @@
 import requests
 from datetime import datetime
+from typing import Any
 
 from config import settings, Config
 from weather.schemas import WeatherModel
@@ -17,7 +18,7 @@ class WeatherServices:
         data: dict = res.json()
         model_object = WeatherModel.model_construct(**data, **data['main'])
         model_object.weather_description = model_object.weather[0]["description"]
-        formats: str = "%Y-%m-%d"
+        formats = "%Y-%m-%d"
         today: str = datetime.now().strftime(formats)
         model_object.response_date = today
         model_object.response_time = datetime.now().strftime('%H:%M:%S')
@@ -25,9 +26,9 @@ class WeatherServices:
         return model_object
 
     def get_weather_from_db(self) -> WeatherModel | None:
-        formats: str = "%Y-%m-%d"
+        formats = "%Y-%m-%d"
         today: str = datetime.now().strftime(formats)
-        query: dict = {
+        query: dict[str, Any] = {
             "city": self.city,
             "response_date": today
         }

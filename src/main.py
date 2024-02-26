@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from dotenv import load_dotenv
 
 from pages.router import router as router_page
 from weather.router import router as router_weather
